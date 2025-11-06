@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { auth } from "@/lib/firebase";
+import { adminAuth } from "@/lib/firebase-admin";
+import { validateCardData } from "@/lib/validation";
 
 export async function PUT(
   request: Request,
@@ -13,12 +14,22 @@ export async function PUT(
     }
 
     const token = authHeader.split("Bearer ")[1];
-    const decodedToken = await auth.verifyIdToken(token);
+    const decodedToken = await adminAuth.verifyIdToken(token);
     const userId = decodedToken.uid;
 
-    const cardId = params.id;
-    const data = await request.json();
-    const { name, bankName, cardNumber, offers } = data;
+    const cardId = params.id
+    const data = await request.json()
+    
+    // Validate the request data
+    const validationErrors = validateCardData(data)
+    if (validationErrors.length > 0) {
+      return NextResponse.json(
+        { error: 'Validation failed', errors: validationErrors },
+        { status: 400 }
+      )
+    }
+
+    const { name, bankName, cardNumber, offers } = data
 
     // First, verify the card belongs to the user
     const existingCard = await prisma.card.findFirst({
@@ -92,7 +103,7 @@ export async function DELETE(
     }
 
     const token = authHeader.split("Bearer ")[1];
-    const decodedToken = await auth.verifyIdToken(token);
+    const decodedToken = await adminAuth.verifyIdToken(token);
     const userId = decodedToken.uid;
 
     const cardId = params.id;
