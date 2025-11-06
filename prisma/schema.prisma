@@ -1,0 +1,70 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  cards     Card[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Card {
+  id           String        @id @default(cuid())
+  name         String
+  bankName     String
+  cardNumber   String        @unique
+  userId       String
+  user         User          @relation(fields: [userId], references: [id])
+  offers       CardOffer[]
+  transactions Transaction[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Merchant {
+  id           String        @id @default(cuid())
+  name         String
+  category     String
+  transactions Transaction[]
+  cardOffers   CardOffer[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model CardOffer {
+  id          String   @id @default(cuid())
+  cardId      String
+  merchantId  String
+  card        Card     @relation(fields: [cardId], references: [id])
+  merchant    Merchant @relation(fields: [merchantId], references: [id])
+  percentage  Float
+  conditions  String?
+  validFrom   DateTime
+  validUntil  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Transaction {
+  id         String   @id @default(cuid())
+  amount     Float
+  cardId     String
+  merchantId String
+  card       Card     @relation(fields: [cardId], references: [id])
+  merchant   Merchant @relation(fields: [merchantId], references: [id])
+  cashback   Float?
+  date       DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
