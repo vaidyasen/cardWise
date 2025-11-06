@@ -17,19 +17,19 @@ export async function PUT(
     const decodedToken = await adminAuth.verifyIdToken(token);
     const userId = decodedToken.uid;
 
-    const cardId = params.id
-    const data = await request.json()
-    
+    const cardId = params.id;
+    const data = await request.json();
+
     // Validate the request data
-    const validationErrors = validateCardData(data)
+    const validationErrors = validateCardData(data);
     if (validationErrors.length > 0) {
       return NextResponse.json(
-        { error: 'Validation failed', errors: validationErrors },
+        { error: "Validation failed", errors: validationErrors },
         { status: 400 }
-      )
+      );
     }
 
-    const { name, bankName, cardNumber, offers } = data
+    const { name, bankName, cardNumber, offers } = data;
 
     // First, verify the card belongs to the user
     const existingCard = await prisma.card.findFirst({

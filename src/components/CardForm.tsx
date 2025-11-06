@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { validateCardData, ValidationError } from '@/lib/validation';
+import { validateCardData, ValidationError } from "@/lib/validation";
 
 interface CardFormData {
   name: string;
@@ -33,27 +33,27 @@ export function CardForm({ onSubmit, initialData }: CardFormProps) {
 
   const validateField = (name: string, value: any): string => {
     switch (name) {
-      case 'name':
-        if (!value) return 'Card name is required';
-        if (value.length < 3) return 'Card name must be at least 3 characters';
+      case "name":
+        if (!value) return "Card name is required";
+        if (value.length < 3) return "Card name must be at least 3 characters";
         break;
-      case 'bankName':
-        if (!value) return 'Bank name is required';
+      case "bankName":
+        if (!value) return "Bank name is required";
         break;
-      case 'cardNumber':
-        if (!value) return 'Last 4 digits are required';
-        if (!/^\d{4}$/.test(value)) return 'Must be exactly 4 digits';
+      case "cardNumber":
+        if (!value) return "Last 4 digits are required";
+        if (!/^\d{4}$/.test(value)) return "Must be exactly 4 digits";
         break;
     }
-    return '';
+    return "";
   };
 
   const handleFieldChange = (field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
     const error = validateField(field, value);
-    setErrors(prev => ({
+    setErrors((prev) => ({
       ...prev,
-      [field]: error
+      [field]: error,
     }));
   };
 
@@ -66,7 +66,7 @@ export function CardForm({ onSubmit, initialData }: CardFormProps) {
     const validationErrors = validateCardData(formData);
     if (validationErrors.length > 0) {
       const errorMap: { [key: string]: string } = {};
-      validationErrors.forEach(error => {
+      validationErrors.forEach((error) => {
         errorMap[error.field] = error.message;
       });
       setErrors(errorMap);
@@ -80,7 +80,7 @@ export function CardForm({ onSubmit, initialData }: CardFormProps) {
       if (error instanceof Error) {
         setErrors({ submit: error.message });
       } else {
-        setErrors({ submit: 'An unexpected error occurred' });
+        setErrors({ submit: "An unexpected error occurred" });
       }
     } finally {
       setLoading(false);
@@ -99,9 +99,9 @@ export function CardForm({ onSubmit, initialData }: CardFormProps) {
 
   const removeOffer = (index: number) => {
     if (formData.offers.length === 1) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        offers: 'At least one offer is required'
+        offers: "At least one offer is required",
       }));
       return;
     }
@@ -125,19 +125,20 @@ export function CardForm({ onSubmit, initialData }: CardFormProps) {
     }));
 
     // Validate offer fields
-    let error = '';
-    if (field === 'merchantCategory' && !value) {
-      error = 'Category is required';
+    let error = "";
+    if (field === "merchantCategory" && !value) {
+      error = "Category is required";
     }
-    if (field === 'percentage') {
+    if (field === "percentage") {
       const numValue = parseFloat(value.toString());
-      if (isNaN(numValue)) error = 'Must be a number';
-      else if (numValue < 0 || numValue > 100) error = 'Must be between 0 and 100';
+      if (isNaN(numValue)) error = "Must be a number";
+      else if (numValue < 0 || numValue > 100)
+        error = "Must be between 0 and 100";
     }
 
-    setErrors(prev => ({
+    setErrors((prev) => ({
       ...prev,
-      [`offers[${index}].${field}`]: error
+      [`offers[${index}].${field}`]: error,
     }));
   };
 
@@ -151,10 +152,10 @@ export function CardForm({ onSubmit, initialData }: CardFormProps) {
           type="text"
           id="cardName"
           className={`mt-1 block w-full rounded-md border ${
-            errors.name ? 'border-red-500' : 'border-gray-700'
+            errors.name ? "border-red-500" : "border-gray-700"
           } bg-gray-800 px-3 py-2 text-white focus:border-purple-500 focus:ring-purple-500`}
           value={formData.name}
-          onChange={(e) => handleFieldChange('name', e.target.value)}
+          onChange={(e) => handleFieldChange("name", e.target.value)}
           required
         />
         {errors.name && (
@@ -170,10 +171,10 @@ export function CardForm({ onSubmit, initialData }: CardFormProps) {
           type="text"
           id="bankName"
           className={`mt-1 block w-full rounded-md border ${
-            errors.bankName ? 'border-red-500' : 'border-gray-700'
+            errors.bankName ? "border-red-500" : "border-gray-700"
           } bg-gray-800 px-3 py-2 text-white focus:border-purple-500 focus:ring-purple-500`}
           value={formData.bankName}
-          onChange={(e) => handleFieldChange('bankName', e.target.value)}
+          onChange={(e) => handleFieldChange("bankName", e.target.value)}
           required
         />
         {errors.bankName && (
@@ -190,12 +191,12 @@ export function CardForm({ onSubmit, initialData }: CardFormProps) {
           id="cardNumber"
           maxLength={4}
           className={`mt-1 block w-full rounded-md border ${
-            errors.cardNumber ? 'border-red-500' : 'border-gray-700'
+            errors.cardNumber ? "border-red-500" : "border-gray-700"
           } bg-gray-800 px-3 py-2 text-white focus:border-purple-500 focus:ring-purple-500`}
           value={formData.cardNumber}
           onChange={(e) => {
             const value = e.target.value.replace(/\D/g, "");
-            handleFieldChange('cardNumber', value);
+            handleFieldChange("cardNumber", value);
           }}
           required
         />

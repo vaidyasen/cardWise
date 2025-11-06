@@ -24,12 +24,21 @@ model Card {
   name         String
   bankName     String
   cardNumber   String        @unique
+  cardNetwork  String        // VISA, Mastercard, American Express, etc.
+  expiryMonth  Int
+  expiryYear   Int
+  cardType     String        // Credit, Debit
+  isActive     Boolean       @default(true)
+  creditLimit  Float?        // Optional credit limit
   userId       String
   user         User          @relation(fields: [userId], references: [id])
   offers       CardOffer[]
   transactions Transaction[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+
+  @@index([cardNetwork])
+  @@index([expiryMonth, expiryYear])
 }
 
 model Merchant {
@@ -43,17 +52,28 @@ model Merchant {
 }
 
 model CardOffer {
-  id          String   @id @default(cuid())
-  cardId      String
-  merchantId  String
-  card        Card     @relation(fields: [cardId], references: [id])
-  merchant    Merchant @relation(fields: [merchantId], references: [id])
-  percentage  Float
-  conditions  String?
-  validFrom   DateTime
-  validUntil  DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String      @id @default(cuid())
+  cardId          String
+  merchantId      String
+  card            Card        @relation(fields: [cardId], references: [id])
+  merchant        Merchant    @relation(fields: [merchantId], references: [id])
+  offerType       String      // CASHBACK, REWARD_POINTS, MILES, DISCOUNT
+  percentage      Float
+  maxAmount      Float?      // Maximum cashback/discount amount
+  minSpend       Float?      // Minimum spend required
+  pointsPerRupee Float?      // For reward point offers
+  conditions     String?
+  validFrom      DateTime
+  validUntil     DateTime?
+  isRecurring    Boolean     @default(false) // Whether offer repeats monthly
+  dayOfMonth     Int?        // Specific day of month for recurring offers
+  daysOfWeek     String?     // JSON array of days (e.g., ["SAT", "SUN"])
+  maxUsesPerMonth Int?       // Maximum times offer can be used per month
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  @@index([offerType])
+  @@index([validFrom, validUntil])
 }
 
 model Transaction {

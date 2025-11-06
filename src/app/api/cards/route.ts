@@ -39,27 +39,27 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const authHeader = request.headers.get('Authorization')
+    const authHeader = request.headers.get("Authorization");
     if (!authHeader) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const token = authHeader.split('Bearer ')[1]
-    const decodedToken = await adminAuth.verifyIdToken(token)
-    const userId = decodedToken.uid
+    const token = authHeader.split("Bearer ")[1];
+    const decodedToken = await adminAuth.verifyIdToken(token);
+    const userId = decodedToken.uid;
 
-    const data = await request.json()
-    
+    const data = await request.json();
+
     // Validate the request data
-    const validationErrors = validateCardData(data)
+    const validationErrors = validateCardData(data);
     if (validationErrors.length > 0) {
       return NextResponse.json(
-        { error: 'Validation failed', errors: validationErrors },
+        { error: "Validation failed", errors: validationErrors },
         { status: 400 }
-      )
+      );
     }
 
-    const { name, bankName, cardNumber, offers } = data
+    const { name, bankName, cardNumber, offers } = data;
 
     const card = await prisma.card.create({
       data: {
