@@ -19,15 +19,29 @@ model User {
   updatedAt DateTime @updatedAt
 }
 
+enum CardNetwork {
+  VISA
+  MASTERCARD
+  AMEX
+  RUPAY
+  DINERS
+  DISCOVER
+}
+
+enum CardType {
+  CREDIT
+  DEBIT
+}
+
 model Card {
   id           String        @id @default(cuid())
   name         String
   bankName     String
   cardNumber   String        @unique
-  cardNetwork  String        // VISA, Mastercard, American Express, etc.
+  cardNetwork  CardNetwork
   expiryMonth  Int
   expiryYear   Int
-  cardType     String        // Credit, Debit
+  cardType     CardType
   isActive     Boolean       @default(true)
   creditLimit  Float?        // Optional credit limit
   userId       String
