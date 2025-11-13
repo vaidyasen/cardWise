@@ -5,12 +5,19 @@ import { validateCardData } from "@/lib/validation";
 import { ApiError } from "@/lib/api-errors";
 import logger from "@/lib/logger";
 import { requireCsrfToken } from "@/lib/csrf";
+import { requireRateLimit, RateLimitPresets } from "@/lib/rate-limit";
 
 export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Apply moderate rate limiting for write endpoints
+    const rateLimitResult = requireRateLimit(request, RateLimitPresets.API);
+    if (rateLimitResult?.error) {
+      return ApiError.rateLimit(rateLimitResult.error.message, rateLimitResult.error.headers);
+    }
+
     // Validate CSRF token
     const csrfValid = await requireCsrfToken(request);
     if (!csrfValid) {
@@ -128,6 +135,12 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Apply moderate rate limiting for write endpoints
+    const rateLimitResult = requireRateLimit(request, RateLimitPresets.API);
+    if (rateLimitResult?.error) {
+      return ApiError.rateLimit(rateLimitResult.error.message, rateLimitResult.error.headers);
+    }
+
     // Validate CSRF token
     const csrfValid = await requireCsrfToken(request);
     if (!csrfValid) {

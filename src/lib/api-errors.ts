@@ -12,6 +12,7 @@ export enum ErrorCode {
   DATABASE_ERROR = "DATABASE_ERROR",
   FORBIDDEN = "FORBIDDEN",
   CSRF_ERROR = "CSRF_ERROR",
+  RATE_LIMIT = "RATE_LIMIT",
 }
 
 /**
@@ -32,7 +33,8 @@ export function createErrorResponse(
   code: ErrorCode,
   status: number,
   error?: unknown,
-  details?: any
+  details?: any,
+  headers?: Record<string, string>
 ): NextResponse<ErrorResponse> {
   // Log error server-side with full context
   if (error) {
@@ -48,7 +50,10 @@ export function createErrorResponse(
       code,
       ...(details && { details }),
     },
-    { status }
+    { 
+      status,
+      headers: headers || {}
+    }
   );
 }
 
@@ -70,6 +75,9 @@ export const ApiError = {
 
   csrf: (message = "Invalid or missing CSRF token") =>
     createErrorResponse(message, ErrorCode.CSRF_ERROR, 403),
+
+  rateLimit: (message: string, headers: Record<string, string>) =>
+    createErrorResponse(message, ErrorCode.RATE_LIMIT, 429, undefined, undefined, headers),
 
   internal: (error?: unknown, message = "Internal server error") =>
     createErrorResponse(message, ErrorCode.INTERNAL_ERROR, 500, error),
