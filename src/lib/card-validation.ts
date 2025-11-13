@@ -93,9 +93,10 @@ export function validateOffer(offer: any) {
     errors.push("Percentage must be between 0 and 100");
   }
 
-  // Validate amounts if present
+  // Validate amounts if present (only if provided and not null)
   if (
     offer.maxAmount !== undefined &&
+    offer.maxAmount !== null &&
     (typeof offer.maxAmount !== "number" || offer.maxAmount <= 0)
   ) {
     errors.push("Maximum amount must be a positive number");
@@ -103,6 +104,7 @@ export function validateOffer(offer: any) {
 
   if (
     offer.minSpend !== undefined &&
+    offer.minSpend !== null &&
     (typeof offer.minSpend !== "number" || offer.minSpend <= 0)
   ) {
     errors.push("Minimum spend must be a positive number");

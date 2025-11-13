@@ -9,13 +9,16 @@ A modern credit card rewards optimization app that helps you maximize cashback a
 
 ## ✨ Features
 
-- 💳 **Card Management**: Add and manage multiple credit/debit cards with network detection
+- 💳 **Card Management**: Add, edit, and delete credit/debit cards with automatic network detection
 - 🏪 **Merchant Offers**: Track category-specific rewards and cashback percentages
-- 🎴 **3D Card View**: Interactive flip cards showing details and offers
-- 🔐 **Secure Authentication**: Firebase Authentication with JWT-based API security
+- 🎴 **3D Card View**: Interactive flip cards showing front details and back offers
+- ✏️ **Full CRUD Operations**: Create, read, update, and delete cards with cascade delete support
+- � **User Profile**: View account information and manage settings
+- �🔐 **Secure Authentication**: Firebase Authentication with JWT-based API security
 - 📊 **Smart Recommendations**: Get suggestions on which card to use for maximum rewards (coming soon)
-- 🎨 **Modern UI**: Beautiful gradient design with glassmorphic effects
+- 🎨 **Modern UI**: Beautiful purple-to-pink gradient design with glassmorphic effects
 - 📱 **Responsive**: Works seamlessly on desktop and mobile devices
+- 🔄 **Real-time Validation**: Client-side and server-side validation for data integrity
 
 ## 🚀 Tech Stack
 
@@ -372,7 +375,7 @@ This project is licensed under the MIT License.
 
 For issues or questions:
 - Open an [issue on GitHub](https://github.com/vaidyasen/cardWise/issues)
-- Contact: [Your Email]
+- Contact: ritikvaidyasen0@gmail.com
 
 ---
 
