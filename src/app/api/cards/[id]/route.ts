@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { adminAuth } from "@/lib/firebase-admin";
 import { validateCardData } from "@/lib/validation";
+import { ApiError } from "@/lib/api-errors";
+import logger from "@/lib/logger";
 
 export async function PUT(
   request: Request,
@@ -10,7 +12,7 @@ export async function PUT(
   try {
     const authHeader = request.headers.get("Authorization");
     if (!authHeader) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return ApiError.unauthorized();
     }
 
     const token = authHeader.split("Bearer ")[1];
@@ -23,10 +25,7 @@ export async function PUT(
     // Validate the request data
     const validationErrors = validateCardData(data);
     if (validationErrors.length > 0) {
-      return NextResponse.json(
-        { error: "Validation failed", errors: validationErrors },
-        { status: 400 }
-      );
+      return ApiError.validation("Validation failed", validationErrors);
     }
 
     const { name, bankName, cardNumber, offers } = data;
@@ -40,7 +39,7 @@ export async function PUT(
     });
 
     if (!existingCard) {
-      return NextResponse.json({ error: "Card not found" }, { status: 404 });
+      return ApiError.notFound("Card");
     }
 
     // Delete existing offers
@@ -113,11 +112,7 @@ export async function PUT(
 
     return NextResponse.json(transformedCard);
   } catch (error) {
-    console.error("Error updating card:", error);
-    return NextResponse.json(
-      { error: "Failed to update card" },
-      { status: 500 }
-    );
+    return ApiError.internal("Error updating card");
   }
 }
 
@@ -128,7 +123,7 @@ export async function DELETE(
   try {
     const authHeader = request.headers.get("Authorization");
     if (!authHeader) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return ApiError.unauthorized();
     }
 
     const token = authHeader.split("Bearer ")[1];
@@ -146,7 +141,7 @@ export async function DELETE(
     });
 
     if (!existingCard) {
-      return NextResponse.json({ error: "Card not found" }, { status: 404 });
+      return ApiError.notFound("Card");
     }
 
     // Delete the card (this will cascade delete the offers due to our schema)
@@ -158,10 +153,6 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting card:", error);
-    return NextResponse.json(
-      { error: "Failed to delete card" },
-      { status: 500 }
-    );
+    return ApiError.internal("Error deleting card");
   }
 }

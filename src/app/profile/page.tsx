@@ -19,7 +19,7 @@ export default function ProfilePage() {
       await logout();
       router.push("/");
     } catch (error) {
-      console.error("Error signing out:", error);
+      // Error signing out - handled silently
     }
   };
 

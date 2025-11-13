@@ -86,29 +86,22 @@ export function CardForm({ onSubmit, initialData }: CardFormProps) {
       })),
     };
 
-    console.log("Form data before validation:", cleanedData);
-
     // Validate all fields
     const validationErrors = validateCardData(cleanedData);
-    console.log("Validation errors:", validationErrors);
     
     if (validationErrors.length > 0) {
       const errorMap: { [key: string]: string } = {};
       validationErrors.forEach((error) => {
         errorMap[error.field] = error.message;
       });
-      console.log("Form validation failed with errors:", errorMap);
       setErrors(errorMap);
       setLoading(false);
       return;
     }
 
     try {
-      console.log("Submitting form data:", cleanedData);
       await onSubmit(cleanedData);
-      console.log("Form submitted successfully");
     } catch (error) {
-      console.error("Form submission error:", error);
       if (error instanceof Error) {
         setErrors({ submit: error.message });
       } else {

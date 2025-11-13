@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { adminAuth } from "@/lib/firebase-admin";
 import { prisma } from "@/lib/prisma";
 import logger from "@/lib/logger";
+import { ApiError } from "@/lib/api-errors";
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,11 +10,7 @@ export async function POST(request: NextRequest) {
     const token = request.headers.get("Authorization")?.split("Bearer ")[1];
     
     if (!token) {
-      logger.warn("POST /api/users - No authorization token");
-      return NextResponse.json(
-        { error: "No authorization token provided" },
-        { status: 401 }
-      );
+      return ApiError.unauthorized();
     }
 
     const decodedToken = await adminAuth.verifyIdToken(token);
@@ -23,11 +20,7 @@ export async function POST(request: NextRequest) {
     logger.info({ userId, email }, "POST /api/users - User authenticated");
 
     if (!email) {
-      logger.warn({ userId }, "POST /api/users - Email not found in token");
-      return NextResponse.json(
-        { error: "Email not found in token" },
-        { status: 400 }
-      );
+      return ApiError.validation("Email not found in token");
     }
 
     // Check if user already exists
@@ -52,18 +45,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ user }, { status: 201 });
   } catch (error: any) {
-    logger.error({ error }, "POST /api/users - Error creating user");
-    
     if (error.code === "auth/id-token-expired") {
-      return NextResponse.json(
-        { error: "Token expired" },
-        { status: 401 }
-      );
+      return ApiError.unauthorized("Token expired");
     }
-
-    return NextResponse.json(
-      { error: "Failed to create user" },
-      { status: 500 }
-    );
+    return ApiError.internal("Error creating user");
   }
 }

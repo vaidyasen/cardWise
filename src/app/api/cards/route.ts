@@ -3,13 +3,13 @@ import { prisma } from "@/lib/prisma";
 import { adminAuth } from "@/lib/firebase-admin";
 import { validateCardData } from "@/lib/validation";
 import logger from "@/lib/logger";
+import { ApiError } from "@/lib/api-errors";
 
 export async function GET(request: Request) {
   try {
     const authHeader = request.headers.get("Authorization");
     if (!authHeader) {
-      logger.warn("GET /api/cards - No authorization header");
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return ApiError.unauthorized();
     }
 
     const token = authHeader.split("Bearer ")[1];
@@ -45,11 +45,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(transformedCards);
   } catch (error) {
-    logger.error({ error }, "GET /api/cards - Error fetching cards");
-    return NextResponse.json(
-      { error: "Failed to fetch cards" },
-      { status: 500 }
-    );
+    return ApiError.internal("Error fetching cards");
   }
 }
 
@@ -57,8 +53,7 @@ export async function POST(request: Request) {
   try {
     const authHeader = request.headers.get("Authorization");
     if (!authHeader) {
-      logger.warn("POST /api/cards - No authorization header");
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return ApiError.unauthorized();
     }
 
     const token = authHeader.split("Bearer ")[1];
@@ -90,11 +85,7 @@ export async function POST(request: Request) {
     // Validate the request data
     const validationErrors = validateCardData(data);
     if (validationErrors.length > 0) {
-      logger.warn({ validationErrors }, "POST /api/cards - Validation failed");
-      return NextResponse.json(
-        { error: "Validation failed", errors: validationErrors },
-        { status: 400 }
-      );
+      return ApiError.validation("Validation failed", validationErrors);
     }
 
     const { name, bankName, cardNumber, cardNetwork, cardType, expiryMonth, expiryYear, offers } = data;
@@ -167,10 +158,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json(transformedCard);
   } catch (error) {
-    logger.error({ error }, "POST /api/cards - Error creating card");
-    return NextResponse.json(
-      { error: "Failed to create card" },
-      { status: 500 }
-    );
+    return ApiError.internal("Error creating card");
   }
 }
