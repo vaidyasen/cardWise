@@ -32,7 +32,7 @@ A modern credit card rewards optimization app that helps you maximize cashback a
 
 ## 📋 Prerequisites
 
-- **Node.js** 18+ 
+- **Node.js** 20.9.0 or higher (required by Next.js 16)
 - **PostgreSQL** database (local or cloud)
 - **Firebase** project for authentication
 

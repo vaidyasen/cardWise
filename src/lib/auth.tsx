@@ -43,10 +43,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               },
             });
           } catch (dbError) {
-            console.error("Error syncing user to database:", dbError);
+            // Log error but don't block authentication
           }
         } catch (error) {
-          console.error("Error getting token:", error);
+          // Error getting token - handled silently
         }
       } else {
         setUser(null);
@@ -66,7 +66,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const token = await userCredential.user.getIdToken();
       document.cookie = `auth=${token}; path=/; max-age=3600; SameSite=Strict`;
     } catch (error) {
-      console.error("Error signing in:", error);
       throw error;
     }
   };
@@ -92,14 +91,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
         
         if (!response.ok) {
-          console.error("Failed to create user in database:", await response.text());
+          // Log error but don't block user registration
         }
       } catch (dbError) {
-        console.error("Error creating user in database:", dbError);
-        // Don't throw here - user is created in Firebase, they can still use the app
+        // User created in Firebase, database sync failed but not critical
       }
     } catch (error) {
-      console.error("Error signing up:", error);
       throw error;
     }
   };
@@ -110,7 +107,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Clear auth cookie
       document.cookie = `auth=; path=/; max-age=0`;
     } catch (error) {
-      console.error("Error signing out:", error);
       throw error;
     }
   };

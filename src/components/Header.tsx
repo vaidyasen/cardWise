@@ -11,9 +11,9 @@ export function Header() {
   const handleLogout = async () => {
     try {
       await logout();
-      router.push("/signin");
+      router.push("/");
     } catch (error) {
-      console.error("Error logging out:", error);
+      // Error logging out - handled silently
     }
   };
 

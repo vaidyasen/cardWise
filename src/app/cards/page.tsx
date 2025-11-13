@@ -45,28 +45,21 @@ export default function CardsPage() {
 
   const handleAddCard = async (cardData: any) => {
     try {
-      console.log("Submitting card data:", cardData);
-      
       const response = await fetchWithAuth("/api/cards", {
         method: "POST",
         body: JSON.stringify(cardData),
       });
-
-      console.log("Response status:", response.status);
       
       if (!response.ok) {
         const errorData = await response.json();
-        console.error("Error response:", errorData);
         throw new Error(errorData.error || "Failed to add card");
       }
 
       const newCard = await response.json();
-      console.log("Card created:", newCard);
       setCards((prev) => [...prev, newCard]);
       setIsAddingCard(false);
       setError("");
     } catch (error: any) {
-      console.error("Error adding card:", error);
       setError(error.message || "Failed to add card");
     }
   };
@@ -92,7 +85,6 @@ export default function CardsPage() {
       );
       setEditingCard(null);
     } catch (error: any) {
-      console.error("Error updating card:", error);
       setError(error.message || "Failed to update card");
       throw error; // Re-throw so CardForm can handle it
     }
