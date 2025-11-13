@@ -42,28 +42,17 @@ export function validateCardData(data: any): ValidationError[] {
     });
   }
 
-  // Card Number validation
+  // Card Number validation (last 4 digits only)
   if (!data.cardNumber) {
     errors.push({
       field: "cardNumber",
       message: "Card number is required",
     });
-  } else {
-    const cardInfo = detectCardNetwork(data.cardNumber);
-    if (!cardInfo.isValid) {
-      errors.push({
-        field: "cardNumber",
-        message: "Invalid card number (failed Luhn check)",
-      });
-    }
-
-    // Validate the detected network matches provided network
-    if (cardInfo.network !== data.cardNetwork) {
-      errors.push({
-        field: "cardNetwork",
-        message: `Card number appears to be ${cardInfo.network}, but ${data.cardNetwork} was selected`,
-      });
-    }
+  } else if (!/^\d{4}$/.test(data.cardNumber)) {
+    errors.push({
+      field: "cardNumber",
+      message: "Card number must be exactly 4 digits",
+    });
   }
 
   // Card Network validation

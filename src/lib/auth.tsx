@@ -1,3 +1,5 @@
+"use client";
+
 import { createContext, useContext, useEffect, useState } from "react";
 import {
   onAuthStateChanged,
@@ -23,11 +25,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setUser(user);
+        // Set auth cookie when user is authenticated
+        try {
+          const token = await user.getIdToken();
+          document.cookie = `auth=${token}; path=/; max-age=3600; SameSite=Strict`;
+          
+          // Ensure user exists in database (create if not exists)
+          try {
+            await fetch("/api/users", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+            });
+          } catch (dbError) {
+            console.error("Error syncing user to database:", dbError);
+          }
+        } catch (error) {
+          console.error("Error getting token:", error);
+        }
       } else {
         setUser(null);
+        // Clear auth cookie when user is not authenticated
+        document.cookie = `auth=; path=/; max-age=0`;
       }
       setLoading(false);
     });
@@ -37,7 +61,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      // Set auth cookie for middleware
+      const token = await userCredential.user.getIdToken();
+      document.cookie = `auth=${token}; path=/; max-age=3600; SameSite=Strict`;
     } catch (error) {
       console.error("Error signing in:", error);
       throw error;
@@ -46,7 +73,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signUp = async (email: string, password: string) => {
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      
+      // Get the Firebase token
+      const token = await userCredential.user.getIdToken();
+      
+      // Set auth cookie for middleware
+      document.cookie = `auth=${token}; path=/; max-age=3600; SameSite=Strict`;
+      
+      // Create user in database
+      try {
+        const response = await fetch("/api/users", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        
+        if (!response.ok) {
+          console.error("Failed to create user in database:", await response.text());
+        }
+      } catch (dbError) {
+        console.error("Error creating user in database:", dbError);
+        // Don't throw here - user is created in Firebase, they can still use the app
+      }
     } catch (error) {
       console.error("Error signing up:", error);
       throw error;
@@ -56,6 +107,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     try {
       await signOut(auth);
+      // Clear auth cookie
+      document.cookie = `auth=; path=/; max-age=0`;
     } catch (error) {
       console.error("Error signing out:", error);
       throw error;
