@@ -5,9 +5,16 @@ import { validateCardData } from "@/lib/validation";
 import logger from "@/lib/logger";
 import { ApiError } from "@/lib/api-errors";
 import { requireCsrfToken } from "@/lib/csrf";
+import { requireRateLimit, RateLimitPresets } from "@/lib/rate-limit";
 
 export async function GET(request: Request) {
   try {
+    // Apply lenient rate limiting for read endpoints
+    const rateLimitResult = requireRateLimit(request, RateLimitPresets.READ);
+    if (rateLimitResult?.error) {
+      return ApiError.rateLimit(rateLimitResult.error.message, rateLimitResult.error.headers);
+    }
+
     const authHeader = request.headers.get("Authorization");
     if (!authHeader) {
       return ApiError.unauthorized();
@@ -52,6 +59,12 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    // Apply moderate rate limiting for write endpoints
+    const rateLimitResult = requireRateLimit(request, RateLimitPresets.API);
+    if (rateLimitResult?.error) {
+      return ApiError.rateLimit(rateLimitResult.error.message, rateLimitResult.error.headers);
+    }
+
     // Validate CSRF token
     const csrfValid = await requireCsrfToken(request);
     if (!csrfValid) {

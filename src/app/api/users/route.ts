@@ -4,9 +4,16 @@ import { prisma } from "@/lib/prisma";
 import logger from "@/lib/logger";
 import { ApiError } from "@/lib/api-errors";
 import { requireCsrfToken } from "@/lib/csrf";
+import { requireRateLimit, RateLimitPresets } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
   try {
+    // Apply strict rate limiting for auth endpoints
+    const rateLimitResult = requireRateLimit(request, RateLimitPresets.AUTH);
+    if (rateLimitResult?.error) {
+      return ApiError.rateLimit(rateLimitResult.error.message, rateLimitResult.error.headers);
+    }
+
     // Validate CSRF token
     const csrfValid = await requireCsrfToken(request);
     if (!csrfValid) {
