@@ -20,13 +20,15 @@ export default function Home() {
           <div className="mt-10 flex justify-center gap-4">
             <Link
               href="/signup"
-              className="rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 px-8 py-3 text-lg font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-purple-500/50"
+              className="rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 px-8 py-3 text-lg font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-purple-500/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-900"
+              aria-label="Get started with CardWise for free"
             >
               Get Started Free
             </Link>
             <Link
               href="/signin"
-              className="rounded-lg border-2 border-purple-400 bg-transparent px-8 py-3 text-lg font-semibold text-purple-400 transition-all hover:bg-purple-400/10"
+              className="rounded-lg border-2 border-purple-400 bg-transparent px-8 py-3 text-lg font-semibold text-purple-400 transition-all hover:bg-purple-400/10 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-900"
+              aria-label="Sign in to your existing CardWise account"
             >
               Sign In
             </Link>
@@ -82,7 +84,8 @@ export default function Home() {
           </p>
           <Link
             href="/signup"
-            className="mt-8 inline-block rounded-lg bg-white px-8 py-3 text-lg font-semibold text-purple-600 shadow-lg transition-all hover:scale-105"
+            className="mt-8 inline-block rounded-lg bg-white px-8 py-3 text-lg font-semibold text-purple-600 shadow-lg transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-purple-600"
+            aria-label="Create your free CardWise account now"
           >
             Create Free Account
           </Link>
