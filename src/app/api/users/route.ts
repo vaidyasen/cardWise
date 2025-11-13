@@ -3,9 +3,16 @@ import { adminAuth } from "@/lib/firebase-admin";
 import { prisma } from "@/lib/prisma";
 import logger from "@/lib/logger";
 import { ApiError } from "@/lib/api-errors";
+import { requireCsrfToken } from "@/lib/csrf";
 
 export async function POST(request: NextRequest) {
   try {
+    // Validate CSRF token
+    const csrfValid = await requireCsrfToken(request);
+    if (!csrfValid) {
+      return ApiError.csrf();
+    }
+
     // Extract and verify Firebase token
     const token = request.headers.get("Authorization")?.split("Bearer ")[1];
     

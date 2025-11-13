@@ -4,6 +4,7 @@ import { adminAuth } from "@/lib/firebase-admin";
 import { validateCardData } from "@/lib/validation";
 import logger from "@/lib/logger";
 import { ApiError } from "@/lib/api-errors";
+import { requireCsrfToken } from "@/lib/csrf";
 
 export async function GET(request: Request) {
   try {
@@ -51,6 +52,12 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    // Validate CSRF token
+    const csrfValid = await requireCsrfToken(request);
+    if (!csrfValid) {
+      return ApiError.csrf();
+    }
+
     const authHeader = request.headers.get("Authorization");
     if (!authHeader) {
       return ApiError.unauthorized();
