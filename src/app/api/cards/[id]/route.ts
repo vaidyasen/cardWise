@@ -4,12 +4,19 @@ import { adminAuth } from "@/lib/firebase-admin";
 import { validateCardData } from "@/lib/validation";
 import { ApiError } from "@/lib/api-errors";
 import logger from "@/lib/logger";
+import { requireCsrfToken } from "@/lib/csrf";
 
 export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Validate CSRF token
+    const csrfValid = await requireCsrfToken(request);
+    if (!csrfValid) {
+      return ApiError.csrf();
+    }
+
     const authHeader = request.headers.get("Authorization");
     if (!authHeader) {
       return ApiError.unauthorized();
@@ -121,6 +128,12 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Validate CSRF token
+    const csrfValid = await requireCsrfToken(request);
+    if (!csrfValid) {
+      return ApiError.csrf();
+    }
+
     const authHeader = request.headers.get("Authorization");
     if (!authHeader) {
       return ApiError.unauthorized();

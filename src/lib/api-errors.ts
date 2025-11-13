@@ -11,6 +11,7 @@ export enum ErrorCode {
   INTERNAL_ERROR = "INTERNAL_ERROR",
   DATABASE_ERROR = "DATABASE_ERROR",
   FORBIDDEN = "FORBIDDEN",
+  CSRF_ERROR = "CSRF_ERROR",
 }
 
 /**
@@ -66,6 +67,9 @@ export const ApiError = {
 
   forbidden: (message = "Forbidden") =>
     createErrorResponse(message, ErrorCode.FORBIDDEN, 403),
+
+  csrf: (message = "Invalid or missing CSRF token") =>
+    createErrorResponse(message, ErrorCode.CSRF_ERROR, 403),
 
   internal: (error?: unknown, message = "Internal server error") =>
     createErrorResponse(message, ErrorCode.INTERNAL_ERROR, 500, error),
