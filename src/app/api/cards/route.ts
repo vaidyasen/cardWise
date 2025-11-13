@@ -8,6 +8,7 @@ import { requireCsrfToken } from "@/lib/csrf";
 import { requireRateLimit, RateLimitPresets } from "@/lib/rate-limit";
 
 export async function GET(request: Request) {
+  const startTime = Date.now();
   try {
     // Apply lenient rate limiting for read endpoints
     const rateLimitResult = requireRateLimit(request, RateLimitPresets.READ);
@@ -24,8 +25,6 @@ export async function GET(request: Request) {
     const decodedToken = await adminAuth.verifyIdToken(token);
     const userId = decodedToken.uid;
 
-    logger.info({ userId }, "GET /api/cards - Fetching cards");
-
     const cards = await prisma.card.findMany({
       where: {
         userId: userId,
@@ -39,8 +38,6 @@ export async function GET(request: Request) {
       },
     });
 
-    logger.info({ userId, count: cards.length }, "GET /api/cards - Cards fetched successfully");
-
     // Transform the response to match the expected format
     const transformedCards = cards.map((card) => ({
       ...card,
@@ -51,13 +48,25 @@ export async function GET(request: Request) {
       })),
     }));
 
+    const duration = Date.now() - startTime;
+    logger.info(
+      { userId, count: cards.length, duration, method: "GET", path: "/api/cards", status: 200 },
+      `GET /api/cards - ${cards.length} cards fetched in ${duration}ms`
+    );
+
     return NextResponse.json(transformedCards);
   } catch (error) {
+    const duration = Date.now() - startTime;
+    logger.error(
+      { error, duration, method: "GET", path: "/api/cards", status: 500 },
+      `GET /api/cards - Error after ${duration}ms`
+    );
     return ApiError.internal("Error fetching cards");
   }
 }
 
 export async function POST(request: Request) {
+  const startTime = Date.now();
   try {
     // Apply moderate rate limiting for write endpoints
     const rateLimitResult = requireRateLimit(request, RateLimitPresets.API);
@@ -80,8 +89,6 @@ export async function POST(request: Request) {
     const decodedToken = await adminAuth.verifyIdToken(token);
     const userId = decodedToken.uid;
     const userEmail = decodedToken.email;
-
-    logger.info({ userId }, "POST /api/cards - User authenticated");
 
     // Ensure user exists in database (create if not exists)
     try {
@@ -164,8 +171,6 @@ export async function POST(request: Request) {
       },
     });
 
-    logger.info({ cardId: card.id, userId }, "POST /api/cards - Card created successfully");
-
     // Transform the response to match the expected format
     const transformedCard = {
       ...card,
@@ -176,8 +181,19 @@ export async function POST(request: Request) {
       })),
     };
 
+    const duration = Date.now() - startTime;
+    logger.info(
+      { cardId: card.id, userId, duration, method: "POST", path: "/api/cards", status: 200 },
+      `POST /api/cards - Card created in ${duration}ms`
+    );
+
     return NextResponse.json(transformedCard);
   } catch (error) {
+    const duration = Date.now() - startTime;
+    logger.error(
+      { error, duration, method: "POST", path: "/api/cards", status: 500 },
+      `POST /api/cards - Error after ${duration}ms`
+    );
     return ApiError.internal("Error creating card");
   }
 }
