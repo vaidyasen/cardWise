@@ -21,7 +21,7 @@ export enum ErrorCode {
 export interface ErrorResponse {
   error: string;
   code: ErrorCode;
-  details?: any;
+  details?: unknown;
 }
 
 /**
@@ -33,7 +33,7 @@ export function createErrorResponse(
   code: ErrorCode,
   status: number,
   error?: unknown,
-  details?: any,
+  details?: unknown,
   headers?: Record<string, string>
 ): NextResponse<ErrorResponse> {
   // Log error server-side with full context
@@ -44,17 +44,19 @@ export function createErrorResponse(
   }
 
   // Return safe error response to client
-  return NextResponse.json<ErrorResponse>(
-    {
-      error: message,
-      code,
-      ...(details && { details }),
-    },
-    { 
-      status,
-      headers: headers || {}
-    }
-  );
+  const response: ErrorResponse = {
+    error: message,
+    code,
+  };
+  
+  if (details !== undefined) {
+    response.details = details;
+  }
+  
+  return NextResponse.json<ErrorResponse>(response, { 
+    status,
+    headers: headers || {}
+  });
 }
 
 /**
@@ -64,7 +66,7 @@ export const ApiError = {
   unauthorized: (message = "Unauthorized") =>
     createErrorResponse(message, ErrorCode.UNAUTHORIZED, 401),
 
-  validation: (message: string, details?: any) =>
+  validation: (message: string, details?: unknown) =>
     createErrorResponse(message, ErrorCode.VALIDATION_ERROR, 400, undefined, details),
 
   notFound: (resource = "Resource") =>

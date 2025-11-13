@@ -65,7 +65,7 @@ export async function PUT(
 
     // Process offers with merchant lookup/creation
     const offerCreates = await Promise.all(
-      offers.map(async (offer: any) => {
+      offers.map(async (offer: { merchantCategory: string; percentage: number; conditions?: string; offerType?: string }) => {
         // Try to find existing merchant or create new one
         let merchant = await prisma.merchant.findFirst({
           where: {

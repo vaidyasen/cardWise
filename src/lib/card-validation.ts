@@ -1,3 +1,5 @@
+import { CardOfferFormData } from "@/types/card";
+
 export type CardNetwork =
   | "VISA"
   | "MASTERCARD"
@@ -71,7 +73,11 @@ export function isExpiryValid(month: number, year: number): boolean {
   return cardDate > today;
 }
 
-export function validateOffer(offer: any) {
+/**
+ * Validates offer data structure
+ * @param offer - Offer object with optional fields (uses any due to complex optional structure)
+ */
+export function validateOffer(offer: any): string[] {
   const errors: string[] = [];
 
   // Basic offer validation
