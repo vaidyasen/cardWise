@@ -19,10 +19,10 @@ export function Header() {
 
   return (
     <header className="border-b border-white/10 bg-gray-900/80 backdrop-blur-lg">
-      <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" aria-label="Top">
+      <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" aria-label="Main navigation">
         <div className="flex w-full items-center justify-between py-4">
           <div className="flex items-center gap-10">
-            <Link href="/" className="group">
+            <Link href="/" className="group" aria-label="CardWise home">
               <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-2xl font-bold text-transparent transition-all group-hover:from-purple-300 group-hover:to-pink-300">
                 CardWise
               </span>
@@ -32,18 +32,21 @@ export function Header() {
                 <Link
                   href="/cards"
                   className="text-base font-medium text-gray-300 transition-colors hover:text-white"
+                  aria-label="View my credit cards"
                 >
                   My Cards
                 </Link>
                 <Link
                   href="/search"
                   className="text-base font-medium text-gray-300 transition-colors hover:text-white"
+                  aria-label="Find best card for purchases"
                 >
                   Find Best Card
                 </Link>
                 <Link
                   href="/insights"
                   className="text-base font-medium text-gray-300 transition-colors hover:text-white"
+                  aria-label="View spending insights and analytics"
                 >
                   Insights
                 </Link>
@@ -53,15 +56,25 @@ export function Header() {
           <div className="flex items-center gap-3">
             {user ? (
               <>
+                {/* User email display for context */}
+                <span 
+                  className="hidden text-sm text-gray-400 sm:block"
+                  aria-label={`Signed in as ${user.email}`}
+                >
+                  {user.email}
+                </span>
                 <Link
                   href="/profile"
-                  className="rounded-lg border border-purple-500/30 bg-purple-500/10 px-4 py-2 text-sm font-medium text-purple-400 transition-all hover:border-purple-500/50 hover:bg-purple-500/20"
+                  className="rounded-lg border border-purple-500/30 bg-purple-500/10 px-4 py-2 text-sm font-medium text-purple-400 transition-all hover:border-purple-500/50 hover:bg-purple-500/20 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-900"
+                  aria-label="Go to profile settings"
                 >
                   Profile
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 px-4 py-2 text-sm font-medium text-white transition-all hover:from-purple-500 hover:to-pink-500"
+                  className="rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 px-4 py-2 text-sm font-medium text-white transition-all hover:from-purple-500 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-900"
+                  aria-label="Sign out of your account"
+                  type="button"
                 >
                   Sign Out
                 </button>
@@ -70,13 +83,15 @@ export function Header() {
               <>
                 <Link
                   href="/signin"
-                  className="rounded-lg border border-purple-500/30 bg-purple-500/10 px-4 py-2 text-sm font-medium text-purple-400 transition-all hover:border-purple-500/50 hover:bg-purple-500/20"
+                  className="rounded-lg border border-purple-500/30 bg-purple-500/10 px-4 py-2 text-sm font-medium text-purple-400 transition-all hover:border-purple-500/50 hover:bg-purple-500/20 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-900"
+                  aria-label="Sign in to your account"
                 >
                   Sign In
                 </Link>
                 <Link
                   href="/signup"
-                  className="rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 px-4 py-2 text-sm font-medium text-white transition-all hover:from-purple-500 hover:to-pink-500"
+                  className="rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 px-4 py-2 text-sm font-medium text-white transition-all hover:from-purple-500 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-900"
+                  aria-label="Create a new account"
                 >
                   Sign Up
                 </Link>
