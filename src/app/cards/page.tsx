@@ -6,6 +6,7 @@ import { CardForm } from "@/components/CardForm";
 import { CardDetails } from "@/components/CardDetails";
 import { fetchWithAuth } from "@/lib/useAuthToken";
 import { Card as PrismaCard } from "@prisma/client";
+import { CardFormData } from "@/types/card";
 
 interface Card extends PrismaCard {
   offers: Array<{
@@ -36,14 +37,14 @@ export default function CardsPage() {
 
       const data = await response.json();
       setCards(data);
-    } catch (error) {
+    } catch (err) {
       setError("Failed to load cards");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleAddCard = async (cardData: any) => {
+  const handleAddCard = async (cardData: CardFormData) => {
     try {
       const response = await fetchWithAuth("/api/cards", {
         method: "POST",
@@ -59,12 +60,13 @@ export default function CardsPage() {
       setCards((prev) => [...prev, newCard]);
       setIsAddingCard(false);
       setError("");
-    } catch (error: any) {
-      setError(error.message || "Failed to add card");
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to add card";
+      setError(errorMessage);
     }
   };
 
-  const handleEditCard = async (cardData: any) => {
+  const handleEditCard = async (cardData: CardFormData) => {
     if (!editingCard) return;
 
     try {
@@ -84,9 +86,10 @@ export default function CardsPage() {
         prev.map((card) => (card.id === updatedCard.id ? updatedCard : card))
       );
       setEditingCard(null);
-    } catch (error: any) {
-      setError(error.message || "Failed to update card");
-      throw error; // Re-throw so CardForm can handle it
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to update card";
+      setError(errorMessage);
+      throw err; // Re-throw so CardForm can handle it
     }
   };
 

@@ -3,6 +3,7 @@ import {
   isExpiryValid,
   validateOffer,
 } from "./card-validation";
+import { CardFormData } from "@/types/card";
 
 export interface ValidationError {
   field: string;
@@ -18,7 +19,7 @@ export class ValidationErrors extends Error {
   }
 }
 
-export function validateCardData(data: any): ValidationError[] {
+export function validateCardData(data: Partial<CardFormData>): ValidationError[] {
   const errors: ValidationError[] = [];
 
   // Card Name validation
@@ -92,8 +93,8 @@ export function validateCardData(data: any): ValidationError[] {
       message: "Expiry date is required",
     });
   } else {
-    const month = parseInt(data.expiryMonth);
-    const year = parseInt(data.expiryYear);
+    const month = typeof data.expiryMonth === 'string' ? parseInt(data.expiryMonth) : data.expiryMonth;
+    const year = typeof data.expiryYear === 'string' ? parseInt(data.expiryYear) : data.expiryYear;
 
     if (isNaN(month) || month < 1 || month > 12) {
       errors.push({
@@ -134,7 +135,7 @@ export function validateCardData(data: any): ValidationError[] {
       message: "At least one offer is required",
     });
   } else {
-    data.offers.forEach((offer: any, index: number) => {
+    data.offers.forEach((offer, index) => {
       const offerErrors = validateOffer(offer);
       offerErrors.forEach((error) => {
         errors.push({

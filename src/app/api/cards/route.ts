@@ -121,7 +121,7 @@ export async function POST(request: Request) {
 
     // Create or find merchants for offers first
     const merchantData = await Promise.all(
-      offers.map(async (offer: any) => {
+      offers.map(async (offer: { merchantCategory: string; percentage: number; conditions?: string; offerType?: string }) => {
         // Try to find existing merchant or create new one
         let merchant = await prisma.merchant.findFirst({
           where: {

@@ -58,7 +58,8 @@ export async function POST(request: NextRequest) {
     logger.info({ userId, email }, "POST /api/users - User created successfully");
 
     return NextResponse.json({ user }, { status: 201 });
-  } catch (error: any) {
+  } catch (err) {
+    const error = err as { code?: string };
     if (error.code === "auth/id-token-expired") {
       return ApiError.unauthorized("Token expired");
     }

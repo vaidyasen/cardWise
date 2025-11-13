@@ -1,20 +1,6 @@
 import { useState } from "react";
 import { validateCardData, ValidationError } from "@/lib/validation";
-
-interface CardFormData {
-  name: string;
-  bankName: string;
-  cardNumber: string;
-  cardNetwork: "VISA" | "MASTERCARD" | "AMEX" | "RUPAY" | "DINERS" | "DISCOVER";
-  cardType: "CREDIT" | "DEBIT";
-  expiryMonth: number;
-  expiryYear: number;
-  offers: {
-    merchantCategory: string;
-    percentage: number;
-    conditions?: string;
-  }[];
-}
+import { CardFormData } from "@/types/card";
 
 interface CardFormProps {
   onSubmit: (data: CardFormData) => Promise<void>;
@@ -39,24 +25,24 @@ export function CardForm({ onSubmit, initialData }: CardFormProps) {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [loading, setLoading] = useState(false);
 
-  const validateField = (name: string, value: any): string => {
+  const validateField = (name: string, value: string | number): string => {
     switch (name) {
       case "name":
         if (!value) return "Card name is required";
-        if (value.length < 3) return "Card name must be at least 3 characters";
+        if (typeof value === "string" && value.length < 3) return "Card name must be at least 3 characters";
         break;
       case "bankName":
         if (!value) return "Bank name is required";
         break;
       case "cardNumber":
         if (!value) return "Last 4 digits are required";
-        if (!/^\d{4}$/.test(value)) return "Must be exactly 4 digits";
+        if (typeof value === "string" && !/^\d{4}$/.test(value)) return "Must be exactly 4 digits";
         break;
     }
     return "";
   };
 
-  const handleFieldChange = (field: string, value: any) => {
+  const handleFieldChange = (field: string, value: string | number) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     const error = validateField(field, value);
     setErrors((prev) => ({
