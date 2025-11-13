@@ -33,7 +33,17 @@ export async function GET(request: Request) {
 
     logger.info({ userId, count: cards.length }, "GET /api/cards - Cards fetched successfully");
 
-    return NextResponse.json(cards);
+    // Transform the response to match the expected format
+    const transformedCards = cards.map((card) => ({
+      ...card,
+      offers: card.offers.map((offer) => ({
+        merchantCategory: offer.merchant.name,
+        percentage: offer.percentage,
+        conditions: offer.conditions,
+      })),
+    }));
+
+    return NextResponse.json(transformedCards);
   } catch (error) {
     logger.error({ error }, "GET /api/cards - Error fetching cards");
     return NextResponse.json(
@@ -95,35 +105,20 @@ export async function POST(request: Request) {
     const merchantData = await Promise.all(
       offers.map(async (offer: any) => {
         // Try to find existing merchant or create new one
-        const merchant = await prisma.merchant.upsert({
+        let merchant = await prisma.merchant.findFirst({
           where: {
-            // We need a unique constraint on name+category, but for now use findFirst
-            id: "temp", // This will fail, forcing create
-          },
-          update: {},
-          create: {
             name: offer.merchantCategory,
-            category: offer.merchantCategory,
           },
-        }).catch(async () => {
-          // If upsert fails, try to find existing merchant
-          const existing = await prisma.merchant.findFirst({
-            where: {
-              name: offer.merchantCategory,
-              category: offer.merchantCategory,
-            },
-          });
-          
-          if (existing) return existing;
-          
-          // Create new merchant if not found
-          return await prisma.merchant.create({
+        });
+
+        if (!merchant) {
+          merchant = await prisma.merchant.create({
             data: {
               name: offer.merchantCategory,
               category: offer.merchantCategory,
             },
           });
-        });
+        }
         
         return {
           merchantId: merchant.id,
@@ -160,7 +155,17 @@ export async function POST(request: Request) {
 
     logger.info({ cardId: card.id, userId }, "POST /api/cards - Card created successfully");
 
-    return NextResponse.json(card);
+    // Transform the response to match the expected format
+    const transformedCard = {
+      ...card,
+      offers: card.offers.map((offer) => ({
+        merchantCategory: offer.merchant.name,
+        percentage: offer.percentage,
+        conditions: offer.conditions,
+      })),
+    };
+
+    return NextResponse.json(transformedCard);
   } catch (error) {
     logger.error({ error }, "POST /api/cards - Error creating card");
     return NextResponse.json(

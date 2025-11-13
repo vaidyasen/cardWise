@@ -5,7 +5,7 @@ import { validateCardData } from "@/lib/validation";
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authHeader = request.headers.get("Authorization");
@@ -17,7 +17,7 @@ export async function PUT(
     const decodedToken = await adminAuth.verifyIdToken(token);
     const userId = decodedToken.uid;
 
-    const cardId = params.id;
+    const { id: cardId } = await params;
     const data = await request.json();
 
     // Validate the request data
@@ -50,6 +50,35 @@ export async function PUT(
       },
     });
 
+    // Process offers with merchant lookup/creation
+    const offerCreates = await Promise.all(
+      offers.map(async (offer: any) => {
+        // Try to find existing merchant or create new one
+        let merchant = await prisma.merchant.findFirst({
+          where: {
+            name: offer.merchantCategory,
+          },
+        });
+
+        if (!merchant) {
+          merchant = await prisma.merchant.create({
+            data: {
+              name: offer.merchantCategory,
+              category: offer.merchantCategory,
+            },
+          });
+        }
+
+        return {
+          merchantId: merchant.id,
+          offerType: offer.offerType || "CASHBACK",
+          percentage: offer.percentage,
+          conditions: offer.conditions,
+          validFrom: new Date(),
+        };
+      })
+    );
+
     // Update the card and create new offers
     const updatedCard = await prisma.card.update({
       where: {
@@ -60,17 +89,7 @@ export async function PUT(
         bankName,
         cardNumber,
         offers: {
-          create: offers.map((offer: any) => ({
-            merchant: {
-              create: {
-                name: offer.merchantCategory,
-                category: offer.merchantCategory,
-              },
-            },
-            percentage: offer.percentage,
-            conditions: offer.conditions,
-            validFrom: new Date(),
-          })),
+          create: offerCreates,
         },
       },
       include: {
@@ -82,7 +101,17 @@ export async function PUT(
       },
     });
 
-    return NextResponse.json(updatedCard);
+    // Transform the response to match the expected format
+    const transformedCard = {
+      ...updatedCard,
+      offers: updatedCard.offers.map((offer) => ({
+        merchantCategory: offer.merchant.name,
+        percentage: offer.percentage,
+        conditions: offer.conditions,
+      })),
+    };
+
+    return NextResponse.json(transformedCard);
   } catch (error) {
     console.error("Error updating card:", error);
     return NextResponse.json(
@@ -94,7 +123,7 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authHeader = request.headers.get("Authorization");
@@ -106,7 +135,7 @@ export async function DELETE(
     const decodedToken = await adminAuth.verifyIdToken(token);
     const userId = decodedToken.uid;
 
-    const cardId = params.id;
+    const { id: cardId } = await params;
 
     // First, verify the card belongs to the user
     const existingCard = await prisma.card.findFirst({

@@ -70,10 +70,26 @@ export function CardForm({ onSubmit, initialData }: CardFormProps) {
     setErrors({});
     setLoading(true);
 
-    console.log("Form data before validation:", formData);
+    // Clean form data - only send fields needed for validation/submission
+    const cleanedData = {
+      name: formData.name,
+      bankName: formData.bankName,
+      cardNumber: formData.cardNumber,
+      cardNetwork: formData.cardNetwork,
+      cardType: formData.cardType,
+      expiryMonth: formData.expiryMonth,
+      expiryYear: formData.expiryYear,
+      offers: formData.offers.map((offer) => ({
+        merchantCategory: offer.merchantCategory,
+        percentage: offer.percentage,
+        conditions: offer.conditions,
+      })),
+    };
+
+    console.log("Form data before validation:", cleanedData);
 
     // Validate all fields
-    const validationErrors = validateCardData(formData);
+    const validationErrors = validateCardData(cleanedData);
     console.log("Validation errors:", validationErrors);
     
     if (validationErrors.length > 0) {
@@ -88,8 +104,8 @@ export function CardForm({ onSubmit, initialData }: CardFormProps) {
     }
 
     try {
-      console.log("Submitting form data:", formData);
-      await onSubmit(formData);
+      console.log("Submitting form data:", cleanedData);
+      await onSubmit(cleanedData);
       console.log("Form submitted successfully");
     } catch (error) {
       console.error("Form submission error:", error);

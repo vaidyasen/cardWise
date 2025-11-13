@@ -75,20 +75,26 @@ export default function CardsPage() {
     if (!editingCard) return;
 
     try {
+      setError(""); // Clear any previous errors
       const response = await fetchWithAuth(`/api/cards/${editingCard.id}`, {
         method: "PUT",
         body: JSON.stringify(cardData),
       });
 
-      if (!response.ok) throw new Error("Failed to update card");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to update card");
+      }
 
       const updatedCard = await response.json();
       setCards((prev) =>
         prev.map((card) => (card.id === updatedCard.id ? updatedCard : card))
       );
       setEditingCard(null);
-    } catch (error) {
-      setError("Failed to update card");
+    } catch (error: any) {
+      console.error("Error updating card:", error);
+      setError(error.message || "Failed to update card");
+      throw error; // Re-throw so CardForm can handle it
     }
   };
 

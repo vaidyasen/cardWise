@@ -69,7 +69,7 @@ model CardOffer {
   id              String      @id @default(cuid())
   cardId          String
   merchantId      String
-  card            Card        @relation(fields: [cardId], references: [id])
+  card            Card        @relation(fields: [cardId], references: [id], onDelete: Cascade)
   merchant        Merchant    @relation(fields: [merchantId], references: [id])
   offerType       String      // CASHBACK, REWARD_POINTS, MILES, DISCOUNT
   percentage      Float
@@ -95,7 +95,7 @@ model Transaction {
   amount     Float
   cardId     String
   merchantId String
-  card       Card     @relation(fields: [cardId], references: [id])
+  card       Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
   merchant   Merchant @relation(fields: [merchantId], references: [id])
   cashback   Float?
   date       DateTime
