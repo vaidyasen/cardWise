@@ -75,9 +75,9 @@ export function validateOffer(offer: any) {
   const errors: string[] = [];
 
   // Basic offer validation
-  if (!offer.offerType) {
-    errors.push("Offer type is required");
-  } else if (
+  // offerType is optional - defaults to CASHBACK if not provided
+  if (
+    offer.offerType &&
     !["CASHBACK", "REWARD_POINTS", "MILES", "DISCOUNT"].includes(
       offer.offerType
     )
@@ -108,12 +108,9 @@ export function validateOffer(offer: any) {
     errors.push("Minimum spend must be a positive number");
   }
 
-  // Validate dates
-  if (!offer.validFrom) {
-    errors.push("Valid from date is required");
-  }
-
+  // Validate dates (optional - will be set to defaults if not provided)
   if (
+    offer.validFrom &&
     offer.validUntil &&
     new Date(offer.validUntil) <= new Date(offer.validFrom)
   ) {

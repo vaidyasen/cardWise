@@ -5,16 +5,13 @@ import { useAuth } from "@/lib/auth";
 import { CardForm } from "@/components/CardForm";
 import { CardDetails } from "@/components/CardDetails";
 import { fetchWithAuth } from "@/lib/useAuthToken";
+import { Card as PrismaCard } from "@prisma/client";
 
-interface Card {
-  id: string;
-  name: string;
-  bankName: string;
-  cardNumber: string;
+interface Card extends PrismaCard {
   offers: Array<{
     merchantCategory: string;
     percentage: number;
-    conditions?: string | null;
+    conditions?: string;
   }>;
 }
 
@@ -48,18 +45,29 @@ export default function CardsPage() {
 
   const handleAddCard = async (cardData: any) => {
     try {
+      console.log("Submitting card data:", cardData);
+      
       const response = await fetchWithAuth("/api/cards", {
         method: "POST",
         body: JSON.stringify(cardData),
       });
 
-      if (!response.ok) throw new Error("Failed to add card");
+      console.log("Response status:", response.status);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error response:", errorData);
+        throw new Error(errorData.error || "Failed to add card");
+      }
 
       const newCard = await response.json();
+      console.log("Card created:", newCard);
       setCards((prev) => [...prev, newCard]);
       setIsAddingCard(false);
-    } catch (error) {
-      setError("Failed to add card");
+      setError("");
+    } catch (error: any) {
+      console.error("Error adding card:", error);
+      setError(error.message || "Failed to add card");
     }
   };
 
@@ -100,86 +108,99 @@ export default function CardsPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-gray-900 via-purple-900/20 to-gray-900">
         <div className="text-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-purple-500 border-t-transparent"></div>
-          <p className="mt-2">Loading your cards...</p>
+          <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-purple-500 border-t-transparent"></div>
+          <p className="mt-4 text-gray-400">Loading your cards...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto max-w-6xl px-4 py-8">
-      <div className="mb-8 flex items-center justify-between">
-        <h1 className="text-3xl font-bold">My Cards</h1>
-        {!isAddingCard && !editingCard && (
-          <button
-            onClick={() => setIsAddingCard(true)}
-            className="rounded-md bg-purple-600 px-4 py-2 text-sm font-semibold text-white hover:bg-purple-500"
-          >
-            Add New Card
-          </button>
-        )}
-      </div>
-
-      {error && (
-        <div className="mb-4 rounded-md bg-red-500 p-4 text-white">{error}</div>
-      )}
-
-      {isAddingCard && (
-        <div className="mb-8 rounded-lg border border-gray-700 bg-gray-800 p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-xl font-bold">Add New Card</h2>
-            <button
-              onClick={() => setIsAddingCard(false)}
-              className="text-gray-400 hover:text-white"
-            >
-              Cancel
-            </button>
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900/20 to-gray-900">
+      <div className="container mx-auto max-w-7xl px-4 py-8">
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold text-white">My Cards</h1>
+            <p className="mt-2 text-gray-400">Manage your credit cards and offers</p>
           </div>
-          <CardForm onSubmit={handleAddCard} />
-        </div>
-      )}
-
-      {editingCard && (
-        <div className="mb-8 rounded-lg border border-gray-700 bg-gray-800 p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-xl font-bold">Edit Card</h2>
-            <button
-              onClick={() => setEditingCard(null)}
-              className="text-gray-400 hover:text-white"
-            >
-              Cancel
-            </button>
-          </div>
-          <CardForm initialData={editingCard} onSubmit={handleEditCard} />
-        </div>
-      )}
-
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {cards.map((card) => (
-          <CardDetails
-            key={card.id}
-            card={card}
-            onEdit={() => setEditingCard(card)}
-            onDelete={() => handleDeleteCard(card.id)}
-          />
-        ))}
-
-        {cards.length === 0 && !isAddingCard && (
-          <div className="col-span-full text-center">
-            <p className="text-gray-400">
-              You haven&apos;t added any cards yet.
-            </p>
+          {!isAddingCard && !editingCard && (
             <button
               onClick={() => setIsAddingCard(true)}
-              className="mt-4 text-purple-500 hover:text-purple-400"
+              className="rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:from-purple-500 hover:to-pink-500 hover:shadow-purple-500/50"
             >
-              Add your first card
+              + Add New Card
             </button>
+          )}
+        </div>
+
+        {error && (
+          <div className="mb-6 rounded-lg border border-red-500/50 bg-red-500/10 p-4 text-red-400">
+            {error}
           </div>
         )}
+
+        {isAddingCard && (
+          <div className="mb-8 rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-white">Add New Card</h2>
+              <button
+                onClick={() => setIsAddingCard(false)}
+                className="text-gray-400 transition-colors hover:text-white"
+              >
+                ✕ Cancel
+              </button>
+            </div>
+            <CardForm onSubmit={handleAddCard} />
+          </div>
+        )}
+
+        {editingCard && (
+          <div className="mb-8 rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-white">Edit Card</h2>
+              <button
+                onClick={() => setEditingCard(null)}
+                className="text-gray-400 transition-colors hover:text-white"
+              >
+                ✕ Cancel
+              </button>
+            </div>
+            <CardForm initialData={editingCard} onSubmit={handleEditCard} />
+          </div>
+        )}
+
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {cards.map((card) => (
+            <CardDetails
+              key={card.id}
+              card={card}
+              onEdit={() => setEditingCard(card)}
+              onDelete={() => handleDeleteCard(card.id)}
+            />
+          ))}
+
+          {cards.length === 0 && !isAddingCard && (
+            <div className="col-span-full rounded-2xl border border-dashed border-white/20 bg-white/5 p-12 text-center backdrop-blur-sm">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-purple-500/20">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+              </div>
+              <p className="text-lg text-gray-300">No cards added yet</p>
+              <p className="mt-2 text-gray-500">
+                Start tracking your rewards by adding your first card
+              </p>
+              <button
+                onClick={() => setIsAddingCard(true)}
+                className="mt-6 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-3 text-sm font-semibold text-white transition-all hover:from-purple-500 hover:to-pink-500"
+              >
+                Add Your First Card
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
