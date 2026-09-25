@@ -11,6 +11,7 @@ type DemoCard = {
   color: string;
   bestFor: string;
   rates: Record<Category, number>;
+  isCustom?: boolean;
 };
 
 const categories: Array<{ id: Category; label: string; example: string }> = [
@@ -21,7 +22,7 @@ const categories: Array<{ id: Category; label: string; example: string }> = [
   { id: "utilities", label: "Bills", example: "Mobile, power and broadband" },
 ];
 
-const demoCards: DemoCard[] = [
+const cardCatalog: DemoCard[] = [
   {
     id: "sbi-cashback",
     name: "SBI Cashback",
@@ -54,6 +55,54 @@ const demoCards: DemoCard[] = [
     bestFor: "utility payments",
     rates: { online: 1.5, dining: 4, groceries: 1.5, travel: 1.5, utilities: 5 },
   },
+  {
+    id: "hdfc-regalia",
+    name: "HDFC Regalia",
+    bank: "HDFC Bank",
+    color: "#a9b7db",
+    bestFor: "travel and lounge access",
+    rates: { online: 1.5, dining: 2, groceries: 1.5, travel: 4, utilities: 1 },
+  },
+  {
+    id: "axis-magnus",
+    name: "Axis Magnus",
+    bank: "Axis Bank",
+    color: "#d5a8c6",
+    bestFor: "premium travel",
+    rates: { online: 2, dining: 3, groceries: 1.5, travel: 5, utilities: 1 },
+  },
+  {
+    id: "amex-mrcc",
+    name: "Amex Membership Rewards",
+    bank: "American Express",
+    color: "#8fc8dd",
+    bestFor: "milestone rewards",
+    rates: { online: 2, dining: 2, groceries: 2, travel: 3, utilities: 1 },
+  },
+  {
+    id: "icici-sapphiro",
+    name: "ICICI Sapphiro",
+    bank: "ICICI Bank",
+    color: "#b7a6df",
+    bestFor: "dining and entertainment",
+    rates: { online: 1.5, dining: 4, groceries: 1, travel: 2.5, utilities: 1 },
+  },
+  {
+    id: "sbi-simplyclick",
+    name: "SBI SimplyCLICK",
+    bank: "SBI Card",
+    color: "#9ec4ef",
+    bestFor: "online shopping",
+    rates: { online: 4, dining: 1, groceries: 1, travel: 2, utilities: 1 },
+  },
+  {
+    id: "hdfc-diners-black",
+    name: "HDFC Diners Club Black",
+    bank: "HDFC Bank",
+    color: "#c5c7c1",
+    bestFor: "travel and dining",
+    rates: { online: 3, dining: 4, groceries: 2, travel: 5, utilities: 1 },
+  },
 ];
 
 const rupees = new Intl.NumberFormat("en-IN", {
@@ -65,15 +114,29 @@ const rupees = new Intl.NumberFormat("en-IN", {
 export default function DemoPage() {
   const [category, setCategory] = useState<Category>("online");
   const [amount, setAmount] = useState(3500);
-  const [selectedCardIds, setSelectedCardIds] = useState<string[]>(demoCards.map((card) => card.id));
+  const [customCards, setCustomCards] = useState<DemoCard[]>([]);
+  const [selectedCardIds, setSelectedCardIds] = useState<string[]>(["sbi-cashback", "hdfc-regalia"]);
+  const [cardName, setCardName] = useState("");
+  const [cardError, setCardError] = useState("");
+
+  const allCards = useMemo(() => [...cardCatalog, ...customCards], [customCards]);
+
+  const suggestions = useMemo(() => {
+    const query = cardName.trim().toLowerCase();
+    if (!query) return cardCatalog.filter((card) => !selectedCardIds.includes(card.id)).slice(0, 5);
+
+    return cardCatalog
+      .filter((card) => !selectedCardIds.includes(card.id) && `${card.name} ${card.bank}`.toLowerCase().includes(query))
+      .slice(0, 5);
+  }, [cardName, selectedCardIds]);
 
   const results = useMemo(
     () =>
-      demoCards
+      allCards
         .filter((card) => selectedCardIds.includes(card.id))
         .map((card) => ({ ...card, rate: card.rates[category], reward: (amount * card.rates[category]) / 100 }))
         .sort((a, b) => b.reward - a.reward),
-    [amount, category, selectedCardIds],
+    [allCards, amount, category, selectedCardIds],
   );
 
   const winner = results[0];
@@ -81,10 +144,57 @@ export default function DemoPage() {
   const selectedCategory = categories.find((item) => item.id === category)!;
   const extraReward = winner && runnerUp ? winner.reward - runnerUp.reward : 0;
 
-  function toggleCard(cardId: string) {
-    setSelectedCardIds((current) =>
-      current.includes(cardId) ? current.filter((id) => id !== cardId) : [...current, cardId],
-    );
+  function addCard(card: DemoCard) {
+    if (selectedCardIds.includes(card.id)) {
+      setCardError("That card is already in your wallet.");
+      return;
+    }
+
+    if (selectedCardIds.length >= 5) {
+      setCardError("You can compare up to five cards at a time.");
+      return;
+    }
+
+    setSelectedCardIds((current) => [...current, card.id]);
+    setCardName("");
+    setCardError("");
+  }
+
+  function addCardByName() {
+    const name = cardName.trim();
+    if (!name) {
+      setCardError("Enter a card name.");
+      return;
+    }
+
+    if (selectedCardIds.length >= 5) {
+      setCardError("You can compare up to five cards at a time.");
+      return;
+    }
+
+    const catalogMatch = cardCatalog.find((card) => card.name.toLowerCase() === name.toLowerCase());
+    if (catalogMatch) {
+      addCard(catalogMatch);
+      return;
+    }
+
+    const customCard: DemoCard = {
+      id: `custom-${Date.now()}`,
+      name,
+      bank: "Custom card",
+      color: "#c9c7bf",
+      bestFor: "general spending",
+      rates: { online: 1, dining: 1, groceries: 1, travel: 1, utilities: 1 },
+      isCustom: true,
+    };
+
+    setCustomCards((current) => [...current, customCard]);
+    addCard(customCard);
+  }
+
+  function removeCard(cardId: string) {
+    setSelectedCardIds((current) => current.filter((id) => id !== cardId));
+    setCardError("");
   }
 
   return (
@@ -109,42 +219,96 @@ export default function DemoPage() {
                 <p className="font-mono text-xs text-[#85877f]">01</p>
                 <h2 className="mt-2 text-lg font-semibold">Cards in your wallet</h2>
               </div>
-              <button
-                type="button"
-                onClick={() =>
-                  setSelectedCardIds(selectedCardIds.length === demoCards.length ? [] : demoCards.map((card) => card.id))
-                }
-                className="text-sm font-semibold underline decoration-[#a3a69e] underline-offset-4 transition hover:decoration-[#171917]"
-              >
-                {selectedCardIds.length === demoCards.length ? "Clear all" : "Select all"}
-              </button>
+              <span className="rounded-full border border-[#cfccc1] px-3 py-1 text-xs font-semibold text-[#62655f]">
+                {selectedCardIds.length} / 5 selected
+              </span>
             </div>
 
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              {demoCards.map((card) => {
-                const active = selectedCardIds.includes(card.id);
+              {selectedCardIds.map((cardId) => {
+                const card = allCards.find((item) => item.id === cardId);
+                if (!card) return null;
+
                 return (
-                  <button
-                    key={card.id}
-                    type="button"
-                    aria-pressed={active}
-                    onClick={() => toggleCard(card.id)}
-                    className={`flex items-center gap-3 rounded-2xl border p-4 text-left transition ${
-                      active
-                        ? "border-[#171917] bg-[#171917] text-white"
-                        : "border-[#d7d4ca] bg-white text-[#171917] hover:border-[#8f928b]"
-                    }`}
-                  >
+                  <div key={card.id} className="flex items-center gap-3 rounded-2xl border border-[#171917] bg-[#171917] p-4 text-white">
                     <span className="h-9 w-2 shrink-0 rounded-full" style={{ backgroundColor: card.color }} />
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm font-semibold">{card.name}</span>
-                      <span className={`mt-0.5 block text-xs ${active ? "text-[#aeb1ab]" : "text-[#777a74]"}`}>{card.bank}</span>
+                      <span className="mt-0.5 block text-xs text-[#aeb1ab]">
+                        {card.isCustom ? "Baseline estimate" : card.bestFor}
+                      </span>
                     </span>
-                    <span className={`flex h-5 w-5 items-center justify-center rounded-full border text-[10px] ${active ? "border-[#d9ff66] bg-[#d9ff66] text-[#171917]" : "border-[#babdb5] text-transparent"}`}>✓</span>
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => removeCard(card.id)}
+                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/20 text-sm text-[#c9ccc5] transition hover:border-white/50 hover:text-white"
+                      aria-label={`Remove ${card.name}`}
+                    >
+                      ×
+                    </button>
+                  </div>
                 );
               })}
+
+              {selectedCardIds.length === 0 && (
+                <div className="col-span-full rounded-2xl border border-dashed border-[#c5c2b8] px-5 py-8 text-center text-sm text-[#777a74]">
+                  Add at least one card to start comparing.
+                </div>
+              )}
             </div>
+
+            <form
+              className="mt-5"
+              onSubmit={(event) => {
+                event.preventDefault();
+                addCardByName();
+              }}
+            >
+              <label htmlFor="card-name" className="text-sm font-semibold">Add a card</label>
+              <p className="mt-1 text-xs leading-5 text-[#777a74]">Search the catalogue or enter any card name. Only the name is required.</p>
+              <div className="mt-3 flex gap-2">
+                <input
+                  id="card-name"
+                  type="text"
+                  value={cardName}
+                  onChange={(event) => {
+                    setCardName(event.target.value);
+                    setCardError("");
+                  }}
+                  placeholder="e.g. Axis Magnus"
+                  className="min-w-0 flex-1 rounded-full border border-[#cfccc1] bg-white px-4 py-3 text-sm outline-none placeholder:text-[#9b9d97] focus:border-[#171917] focus:ring-1 focus:ring-[#171917]"
+                />
+                <button
+                  type="submit"
+                  disabled={selectedCardIds.length >= 5}
+                  className="rounded-full bg-[#171917] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#343734] disabled:cursor-not-allowed disabled:bg-[#a9aaa5]"
+                >
+                  Add
+                </button>
+              </div>
+            </form>
+
+            {cardError && <p className="mt-2 text-sm font-medium text-[#a13d2d]">{cardError}</p>}
+
+            {selectedCardIds.length < 5 && suggestions.length > 0 && (
+              <div className="mt-4">
+                <p className="text-xs font-medium uppercase tracking-[0.12em] text-[#85877f]">
+                  {cardName.trim() ? "Matches" : "Popular cards"}
+                </p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {suggestions.map((card) => (
+                    <button
+                      key={card.id}
+                      type="button"
+                      onClick={() => addCard(card)}
+                      className="rounded-full border border-[#cfccc1] bg-white px-3 py-2 text-xs font-medium text-[#555852] transition hover:border-[#171917] hover:text-[#171917]"
+                    >
+                      + {card.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="mt-8 border-t border-[#dedbd1] pt-7">
               <p className="font-mono text-xs text-[#85877f]">02</p>
@@ -262,7 +426,10 @@ export default function DemoPage() {
                             style={{ width: `${winner.reward > 0 ? (card.reward / winner.reward) * 100 : 0}%`, backgroundColor: card.color }}
                           />
                         </div>
-                        <p className="ml-8 mt-1.5 text-xs text-[#777b74]">{card.rate}% estimated reward</p>
+                        <p className="ml-8 mt-1.5 text-xs text-[#777b74]">
+                          {card.rate}% estimate · Best for {card.bestFor}
+                          {card.isCustom ? " · baseline rate" : ""}
+                        </p>
                       </div>
                     ))}
                   </div>
@@ -281,7 +448,7 @@ export default function DemoPage() {
         </div>
 
         <div className="mt-6 flex flex-col justify-between gap-3 border-t border-[#cfccc1] pt-5 text-sm text-[#70736d] sm:flex-row sm:items-center">
-          <p>Illustrative rates only. Always verify current issuer terms, exclusions, and reward caps.</p>
+          <p>Illustrative rates only. Custom card names use a 1% baseline until issuer data is available.</p>
           <p className="shrink-0 font-mono text-xs">amount × category rate = estimate</p>
         </div>
       </section>

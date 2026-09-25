@@ -6,7 +6,8 @@ The demo is public and does not require an account. It does not collect or store
 
 ## What it demonstrates
 
-- Select one or more cards you already own
+- Search common cards or add any card using only its name
+- Build a temporary wallet of up to five cards
 - Compare rewards across online shopping, dining, groceries, travel, and bills
 - See the best card for a purchase immediately
 - Compare the winner with the next-best option
@@ -20,7 +21,7 @@ The demo is public and does not require an account. It does not collect or store
 3. Enter the purchase amount.
 4. Review the recommended card and ranked comparison.
 
-The current demo includes SBI Cashback, HDFC Millennia, Amazon Pay ICICI, and Axis Ace.
+The catalogue includes popular cards from SBI, HDFC, Axis, ICICI, and American Express. A user can also enter any other card name; custom names use a clearly labelled 1% baseline estimate.
 
 > Reward rates are illustrative and are used to demonstrate the recommendation workflow. Issuer terms, exclusions, and reward caps can change, so current terms should always be verified before making a financial decision.
 
