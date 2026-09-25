@@ -13,24 +13,16 @@ export default function Home() {
             </span>
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-xl text-gray-300">
-            CardWise helps you track all your credit cards and merchant offers in one place. 
-            Get instant recommendations on which card to use for maximum rewards.
+            Select the cards you already have and instantly find which one earns the most for your next purchase.
           </p>
           
-          <div className="mt-10 flex justify-center gap-4">
+          <div className="mt-10 flex justify-center">
             <Link
-              href="/signup"
+              href="/demo"
               className="rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 px-8 py-3 text-lg font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-purple-500/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-900"
-              aria-label="Get started with CardWise for free"
+              aria-label="Try the CardWise recommendation demo"
             >
-              Get Started Free
-            </Link>
-            <Link
-              href="/signin"
-              className="rounded-lg border-2 border-purple-400 bg-transparent px-8 py-3 text-lg font-semibold text-purple-400 transition-all hover:bg-purple-400/10 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-900"
-              aria-label="Sign in to your existing CardWise account"
-            >
-              Sign In
+              Compare My Cards
             </Link>
           </div>
         </div>
@@ -43,9 +35,9 @@ export default function Home() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
               </svg>
             </div>
-            <h3 className="text-xl font-bold text-white">Track All Your Cards</h3>
+            <h3 className="text-xl font-bold text-white">Choose Your Cards</h3>
             <p className="mt-2 text-gray-400">
-              Add all your credit cards with their specific merchant offers and rewards in one central location.
+              Select only the cards already in your wallet. No account or sensitive card details required.
             </p>
           </div>
 
@@ -67,9 +59,9 @@ export default function Home() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
             </div>
-            <h3 className="text-xl font-bold text-white">Insights & Analytics</h3>
+            <h3 className="text-xl font-bold text-white">Compare Clearly</h3>
             <p className="mt-2 text-gray-400">
-              Understand your spending patterns and discover opportunities to earn more rewards.
+              See the estimated reward for every selected card and the value of choosing the winner.
             </p>
           </div>
         </div>
@@ -80,14 +72,14 @@ export default function Home() {
             Ready to optimize your rewards?
           </h2>
           <p className="mt-4 text-lg text-purple-100">
-            Join CardWise today and never miss out on rewards again.
+            Pick your cards and find the best one for your next purchase.
           </p>
           <Link
-            href="/signup"
+            href="/demo"
             className="mt-8 inline-block rounded-lg bg-white px-8 py-3 text-lg font-semibold text-purple-600 shadow-lg transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-purple-600"
-            aria-label="Create your free CardWise account now"
+            aria-label="Try the CardWise recommendation demo"
           >
-            Create Free Account
+            Compare Cards Now
           </Link>
         </div>
       </main>
