@@ -2,30 +2,24 @@ import Link from "next/link";
 
 export function Header() {
   return (
-    <header className="border-b border-white/10 bg-gray-900/80 backdrop-blur-lg">
-      <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" aria-label="Main navigation">
-        <div className="flex w-full items-center justify-between py-4">
-          <div className="flex items-center gap-10">
-            <Link href="/" className="group" aria-label="CardWise home">
-              <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-2xl font-bold text-transparent transition-all group-hover:from-purple-300 group-hover:to-pink-300">
-                CardWise
-              </span>
-            </Link>
-            <div className="hidden space-x-6 md:flex">
-              <Link
-                href="/demo"
-                className="text-base font-medium text-gray-300 transition-colors hover:text-white"
-                aria-label="Try the CardWise recommendation demo"
-              >
-                Live Demo
-              </Link>
-            </div>
-          </div>
+    <header className="border-b border-[#d7d4ca] bg-[#f3f1e8]">
+      <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8" aria-label="Main navigation">
+        <Link href="/" className="flex items-center gap-2.5" aria-label="CardWise home">
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#171917] text-sm font-bold text-[#d9ff66]">
+            C
+          </span>
+          <span className="text-lg font-semibold tracking-[-0.03em]">CardWise</span>
+        </Link>
+
+        <div className="flex items-center gap-5">
+          <Link href="/demo" className="hidden text-sm font-medium text-[#5f625d] transition hover:text-[#171917] sm:block">
+            How it works
+          </Link>
           <Link
             href="/demo"
-            className="rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 px-4 py-2 text-sm font-medium text-white transition-all hover:from-purple-500 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-900"
+            className="rounded-full bg-[#171917] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#343734] focus:outline-none focus:ring-2 focus:ring-[#171917] focus:ring-offset-2 focus:ring-offset-[#f3f1e8]"
           >
-            Compare my cards
+            Compare cards
           </Link>
         </div>
       </nav>
